@@ -5,6 +5,8 @@ from scipy.interpolate import griddata,interp1d
 import math 
 import numpy as np
 
+import store.savemultirun
+
 
 #limit variables NOT PARAMETERS
 is_batt_power = False
