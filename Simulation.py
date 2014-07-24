@@ -481,7 +481,7 @@ def loop(n):
 #simulate and plot
 
 
-current_list = range(10,325000, 200)
+current_list = range(10,65000, 250)
 search_space = len(current_list)-1
 value = 9*60 + 45 #9 mins 45 seconds in seconds
 
@@ -507,19 +507,25 @@ def binary_search_torque(rpm):
     high = search_space
     while low + 1 < high:
         mid = (low+high)//2
+        highflag = 0
         [Sim_mid,end] = Sim(rpm,current_list[mid])
         if Sim_mid < value:
             high = mid
+            highflag = 1
         elif Sim_mid > value:
             low = mid
         else:
-            return [Sim_mid,rpm,current_list[mid]]
-    [Sim_high,end] = Sim(rpm,current_list[high])
-    Sim_low = Sim_mid
+            return [end,Sim_mid,rpm,current_list[mid]]
+    if highflag:
+        Sim_high = Sim_mid
+        [Sim_low,end] = Sim(rpm,current_list[low])
+    else:
+        [Sim_high,end] = Sim(rpm,current_list[high])
+        Sim_low = Sim_mid
     
-    return [Sim_high,rpm,current_list[high]] if abs(Sim_high - value) < abs(Sim_low - value) else [Sim_low,rpm,current_list[low]]
+    return [end,Sim_high,rpm,current_list[high]] if abs(Sim_high - value) < abs(Sim_low - value) else [end,Sim_low,rpm,current_list[low]]
 
-[btime,brpm,btorque] = binary_search_torque(53)
+[end,btime,brpm,btorque] = binary_search_torque(53)
 
 print 'time = ' + repr(btime)
 print 'rpm = ' + repr(brpm)
