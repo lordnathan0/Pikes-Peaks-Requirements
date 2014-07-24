@@ -5,7 +5,7 @@ from scipy.interpolate import griddata,interp1d
 import math 
 import numpy as np
 
-import store.savemultirun
+import store.savemultirun as savemultirun
 
 
 #limit variables NOT PARAMETERS
@@ -482,25 +482,46 @@ def loop(n):
    
 #simulate and plot
 
+out_file = savemultirun.initializeOutput()
+masterRun = dict()
+run = dict()
 
 current_list = range(10,65000, 250)
 search_space = len(current_list)-1
 value = 9*60 + 45 #9 mins 45 seconds in seconds
+
+def Save(end, rpm, torque, time):
+    global masterRun
+    global out_file
+    global run
+    global value
+    
+    run["Finish time"] = float(time)
+    run["Average mph"] = float(mean(speed[:end]))
+    run["Average power"] = float(mean(power[:end]))
+    run["Maximum power"] = float(max(power[:end]))
+    run["Energy used"] = float(max(energy[:end]))
+    run["Max lateral acceleration"] = float(max(lateral_acc[:end]))
+    run["% rpm limit"] = float(mean(motor_rpm_limit[:end])*100)
+    run["% torque limit"] = float(mean(motor_torque_limit[:end])*100)
+    run["RPM limit"] = float(rpm)
+    run["Torque limit"] = float(torque)
+    run["Passed"] = True if time == value else False
+    
+    savemultirun.writeRun(masterRun, run, out_file )
+
 
 def Sim(rpm,torque):
     global top_rpm 
     global top_motor_current 
     
     top_rpm = rpm
-    top_motor_current = torque
-
-    print 'rpm = ' + repr(rpm)
-    print 'torque = ' + repr(torque)    
+    top_motor_current = torque  
     
     n = 0
     end = loop(n)
 
-    print 'time = ' + repr(time[end])  
+    Save(end,rpm,torque,time[end])
         
     return [time[end],end]
 
@@ -518,20 +539,22 @@ def binary_search_torque(rpm):
             low = mid
         else:
             return [end,Sim_mid,rpm,current_list[mid]]
+            
     if highflag:
         Sim_high = Sim_mid
         [Sim_low,end] = Sim(rpm,current_list[low])
+        
     else:
         [Sim_high,end] = Sim(rpm,current_list[high])
         Sim_low = Sim_mid
     
     return [end,Sim_high,rpm,current_list[high]] if abs(Sim_high - value) < abs(Sim_low - value) else [end,Sim_low,rpm,current_list[low]]
 
-[end,btime,brpm,btorque] = binary_search_torque(53)
-
-print 'time = ' + repr(btime)
-print 'rpm = ' + repr(brpm)
-print 'torque = ' + repr(btorque)
+for r in range(10, 100, 20):
+    [end,btime,brpm,btorque] = binary_search_torque(r)
+    print 'time = ' + repr(btime)
+    print 'rpm = ' + repr(brpm)
+    print 'torque = ' + repr(btorque)
 
 #finish plot
 
