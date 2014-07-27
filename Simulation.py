@@ -81,7 +81,7 @@ dist_to_alt_lookup = 'disttoalt_pp.csv'
 soc_to_voltage_lookup = 'simple_bat.csv'
 throttlemap_lookup = 'simple_throttle.csv'
 lean_angle_lookup = 'no_lean.csv'
-corner_radius_lookup = 'pikespeakradius.csv'
+corner_radius_lookup = 'pikes_peak_updated_20pt_least_sqaures.csv'
 chain_eff_lookup = 'chain_eff_30kW.csv'
 
 
