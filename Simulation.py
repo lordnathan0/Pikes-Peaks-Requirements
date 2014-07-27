@@ -74,7 +74,7 @@ top_rpm = 180
 top_motor_current = 3250.0*TyreC
 
 #lookup files
-dist_to_speed_lookup = 'least_square_cdts_9_9.csv'
+dist_to_speed_lookup = 'least_square_cdts_13_9.csv'
 dist_to_alt_lookup = 'disttoalt_pp.csv'
 #motor_controller_eff_lookup = 'simple_cont_eff.csv'
 #motor_eff_lookup = 'simple_motor_eff.csv'
@@ -483,7 +483,7 @@ def loop(n):
 #simulate and plot
 
 
-cdts_list = ['least_square_cdts_9_9.csv']
+cdts_list = ['least_square_cdts_13_9.csv']
 current_list = range(10,65000, 50)
 search_space = len(current_list)-1
 value = 9*60 + 45 #9 mins 45 seconds in seconds

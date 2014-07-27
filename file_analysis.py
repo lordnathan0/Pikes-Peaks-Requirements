@@ -12,46 +12,82 @@ import os.path
 
 from scipy.interpolate import griddata,interp1d
 
-file_dir = 'C:/Users/Nathan/Desktop/Git/Pikes Peak Requirements/PPIHC torque-rpm mapping data - 2014-07-27.json'
-
-json_data=open(file_dir).read()
-
-data = json.loads(json_data)
-
 passlower = 9*60 + 44
 passhigher = 9*60 + 46
 
-rpm_list = list()
-torque_list = list()
-time_list = list()
-average_power_list = list()
+file_dir_list = ['PPIHC torque-rpm mapping data - 13_9.json','PPIHC torque-rpm mapping data - 9_9.json']
 
-pass_list = list()
+f = list()
 
-index = 0
+for d in file_dir_list:
+    json_data=open(d).read()
+    
+    data = json.loads(json_data)
+    
 
-for r in data.keys():
-    for t in data[r].keys():
-        rpm_list.append(float(r))
-        torque_list.append(float(t))
-        time_list.append(data[r][t]['Finish time'])
-        average_power_list.append(data[r][t]['Average power'])
+    
+    rpm_list = list()
+    torque_list = list()
+    time_list = list()
+    average_power_list = list()
+    peak_power_list = list()
+    energy_list = list()
+    
+    pass_list = list()
+    
+    index = 0
+    
+    for r in data.keys():
+        for t in data[r].keys():
+            rpm_list.append(float(r))
+            torque_list.append(float(t))
+            time_list.append(data[r][t]['Finish time'])
+            average_power_list.append(data[r][t]['Average power'])
+            peak_power_list.append(data[r][t]['Maximum power'])
+            energy_list.append(data[r][t]['Energy used'])
+            
+            if (data[r][t]['Finish time'] >= passlower) and (data[r][t]['Finish time'] <= passhigher):
+                pass_list.append(index)
+                print d + ' ' + repr(float(r)) + ' ' + repr(t) + ' ' + repr(data[r][t]['Average power'])
+            
+            index = index + 1
+            
         
-        if (data[r][t]['Finish time'] >= passlower) and (data[r][t]['Finish time'] <= passhigher):
-            pass_list.append(index)
-        
-        index = index + 1
+    
+    rpm = np.array(rpm_list) #0
+    torque = np.array(torque_list)
+    time = np.array(time_list)
+    average_power = np.array(average_power_list)
+    peak_power = np.array(peak_power_list)
+    energy = np.array(energy_list)
+    pass_array = np.array(pass_list)
+    
+    data = list()
+    
+    data.append(rpm.copy())
+    data.append(torque.copy())
+    data.append(time.copy())
+    data.append(average_power.copy())
+    data.append(peak_power.copy()) 
+    data.append(energy.copy())
+    data.append(pass_array.copy())
+    
+    f.append(data)
+    
+    figure(d + ' average power')
+    scatter(rpm,torque, c = average_power, edgecolors = 'none', vmin = min(average_power), vmax = max(average_power))
+    colorbar()
+    scatter(rpm[pass_list],torque[pass_list], c = average_power[pass_list], marker = 's', s = 50, vmin = min(average_power), vmax = max(average_power))
 
-rpm = np.array(rpm_list)
-torque = np.array(torque_list)
-time = np.array(time_list)
-average_power = np.array(average_power_list)
+    figure(d + ' peak power')
+    scatter(rpm,torque, c = peak_power, edgecolors = 'none', vmin = min(peak_power), vmax = max(peak_power))
+    colorbar()
+    scatter(rpm[pass_list],torque[pass_list], c = peak_power[pass_list], marker = 's', s = 50, vmin = min(peak_power), vmax = max(peak_power))
 
-
-figure('average power')
-scatter(rpm,torque, c = average_power, edgecolors = 'none', vmin = min(average_power), vmax = max(average_power))
-colorbar()
-scatter(rpm[pass_list],torque[pass_list], c = average_power[pass_list], marker = 's', s = 50, vmin = min(average_power), vmax = max(average_power))
+    figure(d + ' energy')
+    scatter(rpm,torque, c = energy, edgecolors = 'none', vmin = min(energy), vmax = max(energy))
+    colorbar()
+    scatter(rpm[pass_list],torque[pass_list], c = energy[pass_list], marker = 's', s = 50, vmin = min(energy), vmax = max(energy))
 
 #x = rpm
 #y = torque
