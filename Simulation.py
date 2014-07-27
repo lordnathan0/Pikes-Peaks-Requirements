@@ -67,14 +67,14 @@ TyreC = 9.54
 top_lean_angle = 90
 
 top_motor_current = 3250.0 #Amps
-temp_lapse_rate = 6.5
+temp_lapse_rate = -6.5
 sea_level_pressure = 101325
 
 top_rpm = 180
 top_motor_current = 3250.0*TyreC
 
 #lookup files
-dist_to_speed_lookup = 'least_square_cdts_13_11.csv'
+dist_to_speed_lookup = 'least_square_cdts_9_9.csv'
 dist_to_alt_lookup = 'disttoalt_pp.csv'
 #motor_controller_eff_lookup = 'simple_cont_eff.csv'
 #motor_eff_lookup = 'simple_motor_eff.csv'
@@ -482,10 +482,8 @@ def loop(n):
    
 #simulate and plot
 
-out_file = savemultirun.initializeOutput()
-masterRun = dict()
-run = dict()
 
+cdts_list = ['least_square_cdts_9_9.csv']
 current_list = range(10,65000, 50)
 search_space = len(current_list)-1
 value = 9*60 + 45 #9 mins 45 seconds in seconds
@@ -551,13 +549,24 @@ def binary_search_torque(rpm):
     
     return [end,Sim_high,rpm,current_list[high]] if abs(Sim_high - value) < abs(Sim_low - value) else [end,Sim_low,rpm,current_list[low]]
 
-for r in range(10, 80, 5):
-    [end,btime,brpm,btorque] = binary_search_torque(r)
-    print 'time = ' + repr(btime)
-    print 'rpm = ' + repr(brpm)
-    print 'torque = ' + repr(btorque)
+for f in cdts_list:
+    out_file = savemultirun.initializeOutput()
+    masterRun = dict()
+    run = dict()
+    
+    dist_to_speed_lookup = f
+    n = np.loadtxt(dist_to_speed_lookup,dtype = 'string',delimiter = ',', skiprows = 1)
+    x = n[:,0].astype(np.float)
+    y = n[:,1].astype(np.float)
+    distancetospeed_lookup = interp1d(x,y)
+    
+    for r in range(30, 80, 2):
+        [end,btime,brpm,btorque] = binary_search_torque(r)
+        print 'time = ' + repr(btime)
+        print 'rpm = ' + repr(brpm)
+        print 'torque = ' + repr(btorque)
 
-closeOutput(masterRun, out_file)
+    closeOutput(masterRun, out_file)
 #finish plot
 
     
