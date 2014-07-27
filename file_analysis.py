@@ -12,7 +12,7 @@ import os.path
 
 from scipy.interpolate import griddata,interp1d
 
-file_dir = 'C:/Users/Nathan/Desktop/Git/Pikes Peak Requirements/test.json'
+file_dir = 'C:/Users/Nathan/Desktop/Git/Pikes Peak Requirements/PPIHC torque-rpm mapping data - 2014-07-27.json'
 
 json_data=open(file_dir).read()
 
@@ -21,10 +21,10 @@ data = json.loads(json_data)
 passlower = 9*60 + 44
 passhigher = 9*60 + 46
 
-rpm = list()
-torque = list()
-time = list()
-average_power = list()
+rpm_list = list()
+torque_list = list()
+time_list = list()
+average_power_list = list()
 
 pass_list = list()
 
@@ -32,20 +32,20 @@ index = 0
 
 for r in data.keys():
     for t in data[r].keys():
-        index = index + 1
-        rpm.append(float(r))
-        torque.append(float(t))
-        time.append(data[r][t]['Finish time'])
-        average_power.append(data[r][t]['Average power'])
+        rpm_list.append(float(r))
+        torque_list.append(float(t))
+        time_list.append(data[r][t]['Finish time'])
+        average_power_list.append(data[r][t]['Average power'])
         
-        if data[r][t]['Finish time'] >= passlower and  data[r][t]['Finish time'] <= passhigher:
+        if (data[r][t]['Finish time'] >= passlower) and (data[r][t]['Finish time'] <= passhigher):
             pass_list.append(index)
+        
+        index = index + 1
 
-
-rpm = np.array(rpm)
-torque = np.array(torque)
-time = np.array(time)
-average_power = np.array(average_power)
+rpm = np.array(rpm_list)
+torque = np.array(torque_list)
+time = np.array(time_list)
+average_power = np.array(average_power_list)
 
 
 figure('average power')
