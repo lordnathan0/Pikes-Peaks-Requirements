@@ -74,10 +74,10 @@ top_rpm = 180
 top_motor_current = 3250.0*TyreC
 
 #lookup files
-dist_to_speed_lookup = 'cdts_98_11.csv'
+dist_to_speed_lookup = 'least_square_cdts_13_11.csv'
 dist_to_alt_lookup = 'disttoalt_pp.csv'
-motor_controller_eff_lookup = 'simple_cont_eff.csv'
-motor_eff_lookup = 'simple_motor_eff.csv'
+#motor_controller_eff_lookup = 'simple_cont_eff.csv'
+#motor_eff_lookup = 'simple_motor_eff.csv'
 soc_to_voltage_lookup = 'simple_bat.csv'
 throttlemap_lookup = 'simple_throttle.csv'
 lean_angle_lookup = 'no_lean.csv'
@@ -309,7 +309,7 @@ def Force(s,n):
     acceleration[n+1] = mass*((s - speed[n])/step)
     ambient_temp[n+1] = (sea_level_temp+273.15) - temp_lapse_rate * (altitude[n+1]/1000) - 273.15
     # May want to modify to specify a different sea level standard pressure
-    pressure = sea_level_pressure * (1 - (temp_lapse_rate*(altitude[n+1]/1000)/(sea_level_temp+273.15))) ** (gravity*28.9644/8.31432*temp_lapse_rate)
+    pressure = sea_level_pressure * (1 - (temp_lapse_rate*(altitude[n+1]/1000)/(sea_level_temp+273.15))) ** ((gravity*28.9644)/(8.31432*temp_lapse_rate))
     air_density[n+1] = (pressure * 28.9644) / (8.31432 * (ambient_temp[n+1]+273.15) * 1000)
     drag[n+1] = 0.5 * drag_area*air_density[n+1]*s**2
     slope[n+1] = (altitude[n+1] - altitude[n])/(distance[n+1] - distance[n])    
@@ -486,7 +486,7 @@ out_file = savemultirun.initializeOutput()
 masterRun = dict()
 run = dict()
 
-current_list = range(10,65000, 250)
+current_list = range(10,65000, 50)
 search_space = len(current_list)-1
 value = 9*60 + 45 #9 mins 45 seconds in seconds
 
@@ -507,6 +507,7 @@ def Save(end, rpm, torque, time):
     run["RPM limit"] = float(rpm)
     run["Torque limit"] = float(torque)
     run["Passed"] = True if time == value else False
+
     
     savemultirun.writeRun(masterRun, run, out_file )
 
@@ -550,12 +551,13 @@ def binary_search_torque(rpm):
     
     return [end,Sim_high,rpm,current_list[high]] if abs(Sim_high - value) < abs(Sim_low - value) else [end,Sim_low,rpm,current_list[low]]
 
-for r in range(10, 100, 20):
+for r in range(10, 80, 5):
     [end,btime,brpm,btorque] = binary_search_torque(r)
     print 'time = ' + repr(btime)
     print 'rpm = ' + repr(brpm)
     print 'torque = ' + repr(btorque)
 
+closeOutput(masterRun, out_file)
 #finish plot
 
     
