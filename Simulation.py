@@ -485,7 +485,7 @@ def loop(n):
 #simulate and plot
 
 
-cdts_list = ['least_square_cdts_9_9.csv']
+cdts_list = ['least_square_cdts_11_7.csv','least_square_cdts_11_10.csv', 'least_square_cdts_12_11.csv' , 'least_square_cdts_12_7.csv', 'least_square_cdts_13_12.csv', 'least_square_cdts_10_9.csv', 'least_square_cdts_10_7.csv', 'least_square_cdts_9_9.csv', 'least_square_cdts_9_7.csv', 'least_square_cdts_13_7.csv']
 current_list = range(10,65000, 50)
 search_space = len(current_list)-1
 value = 9*60 + 45 #9 mins 45 seconds in seconds
