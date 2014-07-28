@@ -67,14 +67,14 @@ TyreC = 9.54
 top_lean_angle = 90
 
 top_motor_current = 3250.0 #Amps
-temp_lapse_rate = -6.5
+temp_lapse_rate = 6.5
 sea_level_pressure = 101325
 
 top_rpm = 180
 top_motor_current = 3250.0*TyreC
 
 #lookup files
-dist_to_speed_lookup = 'least_square_cdts_13_9.csv'
+dist_to_speed_lookup = 'least_square_cdts_9_9.csv'
 dist_to_alt_lookup = 'disttoalt_pp.csv'
 #motor_controller_eff_lookup = 'simple_cont_eff.csv'
 #motor_eff_lookup = 'simple_motor_eff.csv'
@@ -184,6 +184,8 @@ incline = np.zeros((steps+1,tests),dtype=float)
 rolling = np.zeros((steps+1,tests),dtype=float)
 air_density = np.zeros((steps+1,tests),dtype=float)
 ambient_temp = np.zeros((steps+1,tests),dtype=float)
+pressure = np.zeros((steps+1, tests),dtype=float)
+
 
 motor_rpm = np.zeros((steps+1,tests),dtype=float)
 motor_torque = np.zeros((steps+1,tests),dtype=float)
@@ -307,10 +309,11 @@ def force_solve(s,n):
 #Find Force at point n+1
 def Force(s,n):
     acceleration[n+1] = mass*((s - speed[n])/step)
-    ambient_temp[n+1] = (sea_level_temp+273.15) - temp_lapse_rate * (altitude[n+1]/1000) - 273.15
-    # May want to modify to specify a different sea level standard pressure
-    pressure = sea_level_pressure * (1 - (temp_lapse_rate*(altitude[n+1]/1000)/(sea_level_temp+273.15))) ** ((gravity*28.9644)/(8.31432*temp_lapse_rate))
-    air_density[n+1] = (pressure * 28.9644) / (8.31432 * (ambient_temp[n+1]+273.15) * 1000)
+    altitude[n+1] = distancetoaltitude_lookup(distance[n+1])
+    ambient_temp[n+1] = ambient_temp[n] + ((temp_lapse_rate)*((altitude[n+1])-(altitude[n])))
+    pressure[n+1] = pressure[n] * (((ambient_temp[n+1]+273.15)/(ambient_temp[n]+273.15))**((-1*gravity)/(temp_lapse_rate*287.05)))
+    air_density[n+1] = air_density[n] * (((ambient_temp[n+1]+273.15)/(ambient_temp[n]+273.15))**(-1*((gravity/(temp_lapse_rate*287.05))+1)))
+
     drag[n+1] = 0.5 * drag_area*air_density[n+1]*s**2
     slope[n+1] = (altitude[n+1] - altitude[n])/(distance[n+1] - distance[n])    
     incline[n+1] = mass*gravity*slope[n+1]
@@ -394,12 +397,11 @@ distance[0] = .1 #can't be 0 because not in look up
 speed[0] = .1 #can't be 0 or the bike will never start moving
 altitude[0] = distancetoaltitude_lookup(1)
 
-ambient_temp[0] = coolant_temp
-print ambient_temp[0]
-pressure = sea_level_pressure * (1 - (temp_lapse_rate*(altitude[0]/1000)/(sea_level_temp+273.15))) ** (gravity*28.9644/8.31432*temp_lapse_rate)
-print pressure
-air_density[0] = (pressure * 28.9644) / (8.31432 * (ambient_temp[0]+273.15) * 1000)
-print air_density[0]
+ambient_temp[0] = ((sea_level_temp+273.15) - temp_lapse_rate * (altitude[0]/1000)) - 273.15
+pressure[0] = sea_level_pressure * (1 - (temp_lapse_rate*(altitude[0]/1000)/(sea_level_temp+273.15))) ** ((gravity*28.9644)/(8.31432*temp_lapse_rate))
+air_density[0] = (pressure[0] * 28.9644) / (8.31432 * (ambient_temp[0]+273.15) * 1000)
+
+temp_lapse_rate = -6.5/1000.0
 
 voltage[0] = soctovoltage_lookup(0) * series_cells
 
@@ -483,7 +485,7 @@ def loop(n):
 #simulate and plot
 
 
-cdts_list = ['least_square_cdts_13_9.csv']
+cdts_list = ['least_square_cdts_9_9.csv']
 current_list = range(10,65000, 50)
 search_space = len(current_list)-1
 value = 9*60 + 45 #9 mins 45 seconds in seconds

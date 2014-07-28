@@ -15,7 +15,7 @@ from scipy.interpolate import griddata,interp1d
 passlower = 9*60 + 44
 passhigher = 9*60 + 46
 
-file_dir_list = ['PPIHC torque-rpm mapping data - 13_9.json','PPIHC torque-rpm mapping data - 9_9.json']
+file_dir_list = ['PPIHC torque-rpm mapping data - 2014-07-27 4.json', 'PPIHC torque-rpm mapping data - 9_9 air density.json']
 
 f = list()
 
@@ -48,7 +48,7 @@ for d in file_dir_list:
             
             if (data[r][t]['Finish time'] >= passlower) and (data[r][t]['Finish time'] <= passhigher):
                 pass_list.append(index)
-                print d + ' ' + repr(float(r)) + ' ' + repr(t) + ' ' + repr(data[r][t]['Average power'])
+                print d + ' ' + repr(float(r)) + ' ' + repr(float(t)) + ' ' + repr(data[r][t]['Average power']) + ' ' + repr(data[r][t]['Maximum power']) + ' ' + repr(data[r][t]['Energy used'])
             
             index = index + 1
             
