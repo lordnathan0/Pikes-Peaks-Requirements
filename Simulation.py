@@ -568,7 +568,7 @@ for f in cdts_list:
         print 'rpm = ' + repr(brpm)
         print 'torque = ' + repr(btorque)
 
-    closeOutput(masterRun, out_file)
+    savemultirun.closeOutput(masterRun, out_file)
 #finish plot
 
     
